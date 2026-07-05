@@ -1,6 +1,7 @@
-import numpy as np
+import argparse
 
 from src.adaptive_fusion import AdaptiveFusionPolicy
+from src.config import load_config
 from src.failure_predictor import FailureIndicators, FailurePredictor
 from src.logger import ExperimentLogger
 from src.recovery_policy import RecoveryPolicy
@@ -13,10 +14,32 @@ from src.uncertainty_estimator import (
 )
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Run adaptive multi-modal SLAM experiment.')
+    parser.add_argument(
+        '--config',
+        default='configs/example_experiment.yaml',
+        help='Path to YAML experiment configuration.',
+    )
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
+    config = load_config(args.config)
+
+    uncertainty_cfg = config.raw.get('uncertainty_estimation', {})
+    fusion_cfg = config.raw.get('adaptive_fusion', {})
+
     backend = DummySlamBackend()
-    uncertainty = UncertaintyEstimator()
-    fusion = AdaptiveFusionPolicy()
+    uncertainty = UncertaintyEstimator(
+        min_features=uncertainty_cfg.get('min_features', 50),
+        target_features=uncertainty_cfg.get('target_features', 200),
+        max_reprojection_error=uncertainty_cfg.get('max_reprojection_error', 5.0),
+    )
+    fusion = AdaptiveFusionPolicy(
+        minimum_weight=fusion_cfg.get('minimum_weight', 0.05),
+    )
     predictor = FailurePredictor()
     recovery = RecoveryPolicy()
     logger = ExperimentLogger()
@@ -65,6 +88,9 @@ def main():
 
         experiment_log.append(
             {
+                'experiment_name': config.name,
+                'dataset': config.dataset_name,
+                'baseline': config.baseline_system,
                 'step': step,
                 'timestamp': slam_result.timestamp,
                 'position': slam_result.position.tolist(),
@@ -79,9 +105,9 @@ def main():
             }
         )
 
-    logger.save_metrics('dummy_adaptive_slam_run', {'steps': experiment_log})
+    logger.save_metrics(config.name, {'steps': experiment_log})
     backend.shutdown()
-    print('End-to-end adaptive SLAM experiment completed.')
+    print(f'Experiment completed: {config.name}')
 
 
 if __name__ == '__main__':
