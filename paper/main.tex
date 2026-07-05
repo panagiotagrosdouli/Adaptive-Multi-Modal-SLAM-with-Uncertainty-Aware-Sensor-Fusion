@@ -1,0 +1,41 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{cite}
+
+\title{Adaptive Multi-Modal SLAM with Uncertainty-Aware Sensor Fusion for Robust Autonomous Navigation}
+
+\author{Panagiota Grosdouli}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Visual-inertial SLAM systems are central to autonomous robot navigation, yet their reliability can degrade under low illumination, motion blur, texture scarcity, and rapid motion. This paper investigates an uncertainty-aware adaptive fusion framework that estimates modality reliability online and adjusts the contribution of visual and inertial measurements during state estimation. The long-term goal is a self-healing SLAM system that can predict localization failure and activate recovery policies before catastrophic tracking loss.
+\end{abstract}
+
+\section{Introduction}
+Autonomous robots operating in real-world environments must localize reliably despite perceptual degradation. Classical SLAM pipelines often assume fixed sensor fusion strategies, although the reliability of visual and inertial measurements changes over time.
+
+\section{Related Work}
+This section will review visual SLAM, visual-inertial odometry, uncertainty estimation, event-based sensing, and failure recovery in robotic perception.
+
+\section{Method}
+The proposed framework consists of a SLAM backend, uncertainty estimator, adaptive fusion policy, failure predictor, and recovery policy.
+
+\section{Experiments}
+Experiments will evaluate the system on EuRoC MAV and TUM-VI under controlled degradation.
+
+\section{Results}
+This section will report trajectory accuracy, tracking failures, recovery latency, and uncertainty calibration.
+
+\section{Conclusion}
+The project aims to demonstrate that explicit uncertainty reasoning can improve SLAM robustness and provide a path toward self-healing robot perception.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
