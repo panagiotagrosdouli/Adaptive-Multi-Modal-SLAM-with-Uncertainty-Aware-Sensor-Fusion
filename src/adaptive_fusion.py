@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from uncertainty_estimator import ModalityReliability
+from src.uncertainty_estimator import ModalityReliability
 
 
 @dataclass
