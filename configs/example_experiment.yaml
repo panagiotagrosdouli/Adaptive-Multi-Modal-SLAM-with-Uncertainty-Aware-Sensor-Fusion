@@ -1,0 +1,33 @@
+experiment_name: euroc_degraded_adaptive_fusion_baseline
+
+dataset:
+  name: EuRoC MAV
+  sequence: MH_01_easy
+  data_root: data/euroc
+
+baseline:
+  system: ORB-SLAM3
+  mode: visual_inertial
+
+degradation:
+  enabled: true
+  image_blur: 0.2
+  brightness_scale: 0.7
+  gaussian_noise_std: 0.01
+  frame_dropout_probability: 0.0
+
+uncertainty_estimation:
+  min_features: 50
+  target_features: 200
+  max_reprojection_error: 5.0
+
+adaptive_fusion:
+  enabled: true
+  minimum_weight: 0.05
+
+metrics:
+  - absolute_trajectory_error
+  - relative_pose_error
+  - tracking_failure_rate
+  - recovery_time
+  - runtime
