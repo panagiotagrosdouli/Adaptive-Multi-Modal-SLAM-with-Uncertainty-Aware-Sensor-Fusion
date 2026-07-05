@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 from src.adaptive_fusion import AdaptiveFusionPolicy
 from src.config import load_config
@@ -12,6 +13,7 @@ from src.uncertainty_estimator import (
     UncertaintyEstimator,
     VisualQualitySignals,
 )
+from src.visualization import generate_all_plots
 
 
 def parse_args():
@@ -106,8 +108,11 @@ def main():
         )
 
     logger.save_metrics(config.name, {'steps': experiment_log})
+    result_path = Path('results') / f'{config.name}.json'
+    generate_all_plots(result_path, Path('results') / 'plots' / config.name)
     backend.shutdown()
     print(f'Experiment completed: {config.name}')
+    print(f'Results written to: {result_path}')
 
 
 if __name__ == '__main__':
