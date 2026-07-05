@@ -1,0 +1,28 @@
+experiment_name: orbslam3_euroc_mh01_baseline
+
+dataset:
+  name: EuRoC MAV
+  sequence: MH_01_easy
+  data_root: /path/to/EuRoC/MH_01_easy
+  ground_truth: /path/to/EuRoC/MH_01_easy/mav0/state_groundtruth_estimate0/data.csv
+
+baseline:
+  system: ORB-SLAM3
+  mode: visual_inertial
+
+orbslam3:
+  executable: /path/to/ORB_SLAM3/Examples/Stereo-Inertial/stereo_inertial_euroc
+  vocabulary: /path/to/ORB_SLAM3/Vocabulary/ORBvoc.txt
+  settings: /path/to/ORB_SLAM3/Examples/Stereo-Inertial/EuRoC.yaml
+  sequence_path: /path/to/EuRoC/MH_01_easy
+  output_trajectory: results/trajectories/orbslam3_euroc_mh01.csv
+  timeout_seconds: 600
+
+degradation:
+  enabled: false
+
+metrics:
+  - absolute_trajectory_error
+  - relative_pose_error
+  - tracking_failure_rate
+  - runtime
