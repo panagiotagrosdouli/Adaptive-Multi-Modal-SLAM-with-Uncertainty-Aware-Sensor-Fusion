@@ -20,3 +20,8 @@ def test_run_experiment_smoke(tmp_path):
     data = json.loads(output_file.read_text())
     assert 'steps' in data
     assert len(data['steps']) == 20
+
+    plot_dir = Path('results/plots/euroc_degraded_adaptive_fusion_baseline')
+    assert (plot_dir / 'failure_probability.png').exists()
+    assert (plot_dir / 'reliability.png').exists()
+    assert (plot_dir / 'fusion_weights.png').exists()
