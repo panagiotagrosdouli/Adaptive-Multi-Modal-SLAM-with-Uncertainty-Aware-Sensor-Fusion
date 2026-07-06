@@ -5,6 +5,7 @@ from src.adaptive_fusion import AdaptiveFusionPolicy
 from src.config import load_config
 from src.failure_predictor import FailureIndicators, FailurePredictor
 from src.logger import ExperimentLogger
+from src.provenance import create_manifest, save_manifest
 from src.recovery_policy import RecoveryPolicy
 from src.slam_backend import DummySlamBackend, SlamObservation
 from src.system_state import SystemState
@@ -109,10 +110,30 @@ def main():
 
     logger.save_metrics(config.name, {'steps': experiment_log})
     result_path = Path('results') / f'{config.name}.json'
-    generate_all_plots(result_path, Path('results') / 'plots' / config.name)
+    plot_dir = Path('results') / 'plots' / config.name
+    generate_all_plots(result_path, plot_dir)
+
+    manifest_path = Path('results') / 'manifests' / f'{config.name}_manifest.json'
+    manifest = create_manifest(
+        experiment_name=config.name,
+        config_path=args.config,
+        outputs=[
+            str(result_path),
+            str(plot_dir / 'failure_probability.png'),
+            str(plot_dir / 'reliability.png'),
+            str(plot_dir / 'fusion_weights.png'),
+        ],
+        metadata={
+            'dataset': config.dataset_name,
+            'baseline': config.baseline_system,
+        },
+    )
+    save_manifest(manifest, manifest_path)
+
     backend.shutdown()
     print(f'Experiment completed: {config.name}')
     print(f'Results written to: {result_path}')
+    print(f'Manifest written to: {manifest_path}')
 
 
 if __name__ == '__main__':
