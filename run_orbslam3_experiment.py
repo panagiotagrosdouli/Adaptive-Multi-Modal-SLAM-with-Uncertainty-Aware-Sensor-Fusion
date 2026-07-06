@@ -1,8 +1,11 @@
 import argparse
+import json
 from pathlib import Path
 
 from src.backends.orbslam3_backend import OrbSlam3Backend, OrbSlam3Config
 from src.config import load_config
+from src.evaluation import evaluate_trajectory
+from src.trajectory import load_euroc_ground_truth
 
 
 def parse_args():
@@ -27,6 +30,19 @@ def build_orbslam3_config(raw_config) -> OrbSlam3Config:
     )
 
 
+def save_evaluation_report(config_name, evaluation, output_path):
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    report = {
+        'experiment_name': config_name,
+        'matched_poses': evaluation.matched_poses,
+        'absolute_trajectory_error': evaluation.ate,
+        'relative_pose_error': evaluation.rpe,
+    }
+    output_path.write_text(json.dumps(report, indent=2), encoding='utf-8')
+    return report
+
+
 def main():
     args = parse_args()
     config = load_config(args.config)
@@ -38,9 +54,20 @@ def main():
     print(' '.join(backend.build_command()))
 
     backend.run_sequence()
-    trajectory = backend.load_estimated_trajectory()
+    estimated_trajectory = backend.load_estimated_trajectory()
 
-    print(f'Estimated trajectory poses: {len(trajectory)}')
+    ground_truth_path = config.raw.get('dataset', {}).get('ground_truth')
+    if ground_truth_path:
+        ground_truth = load_euroc_ground_truth(ground_truth_path)
+        evaluation = evaluate_trajectory(ground_truth, estimated_trajectory)
+        report_path = Path('results') / f'{config.name}_evaluation.json'
+        report = save_evaluation_report(config.name, evaluation, report_path)
+        print(f"Matched poses: {report['matched_poses']}")
+        print(f"ATE: {report['absolute_trajectory_error']}")
+        print(f"RPE: {report['relative_pose_error']}")
+        print(f'Evaluation report: {report_path}')
+
+    print(f'Estimated trajectory poses: {len(estimated_trajectory)}')
     print(f'Output trajectory: {backend_config.output_trajectory}')
 
 
