@@ -1,0 +1,18 @@
+experiment_name: euroc_low_light_motion_blur_degradation
+
+dataset:
+  name: EuRoC MAV
+  sequence: MH_01_easy
+  input_image_dir: /path/to/EuRoC/MH_01_easy/mav0/cam0/data
+  output_image_dir: data/degraded/MH_01_easy_low_light_blur/cam0/data
+
+degradation:
+  brightness_scale: 0.45
+  motion_blur_ksize: 9
+  noise_sigma: 5.0
+  drop_every_n: 0
+  seed: 42
+
+purpose:
+  description: Controlled low-light and motion-blur degradation for SLAM robustness experiments.
+  expected_effect: Reduced visual tracking quality, higher reprojection error, fewer tracked features.
