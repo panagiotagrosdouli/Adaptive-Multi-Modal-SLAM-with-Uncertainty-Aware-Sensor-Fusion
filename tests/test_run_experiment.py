@@ -25,3 +25,10 @@ def test_run_experiment_smoke(tmp_path):
     assert (plot_dir / 'failure_probability.png').exists()
     assert (plot_dir / 'reliability.png').exists()
     assert (plot_dir / 'fusion_weights.png').exists()
+
+    manifest_file = Path('results/manifests/euroc_degraded_adaptive_fusion_baseline_manifest.json')
+    assert manifest_file.exists()
+    manifest = json.loads(manifest_file.read_text())
+    assert manifest['experiment_name'] == 'euroc_degraded_adaptive_fusion_baseline'
+    assert manifest['config_path'] == 'configs/example_experiment.yaml'
+    assert str(output_file) in manifest['outputs']
