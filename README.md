@@ -21,9 +21,70 @@ Classical visual SLAM and visual-inertial odometry systems often degrade sharply
 
 Instead of treating all sensor measurements as equally reliable, this project explores **uncertainty-aware adaptive fusion**, where the system estimates the reliability of each sensing modality and adjusts its contribution to state estimation in real time.
 
+## Current Capabilities
+
+The repository currently includes:
+
+- a reproducible YAML-based experiment runner,
+- uncertainty estimation and adaptive fusion modules,
+- failure prediction and recovery-policy skeletons,
+- EuRoC image, IMU, and ground-truth trajectory parsing,
+- trajectory matching and ATE/RPE evaluation,
+- plotting utilities for experiment logs,
+- an ORB-SLAM3 EuRoC backend wrapper,
+- CI tests for core research modules.
+
+## Quick Start
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the dummy end-to-end adaptive SLAM pipeline:
+
+```bash
+python run_experiment.py --config configs/example_experiment.yaml
+```
+
+Generate plots from a saved experiment JSON:
+
+```bash
+python generate_plots.py results/euroc_degraded_adaptive_fusion_baseline.json
+```
+
+Run tests:
+
+```bash
+pytest -q
+```
+
+## ORB-SLAM3 EuRoC Baseline
+
+This repository does not vendor ORB-SLAM3. Build ORB-SLAM3 separately, download EuRoC MAV, then edit:
+
+```bash
+configs/orbslam3_euroc.yaml
+```
+
+Run a real ORB-SLAM3 baseline:
+
+```bash
+python run_orbslam3_experiment.py --config configs/orbslam3_euroc.yaml
+```
+
+If a EuRoC ground-truth CSV is configured, the script computes:
+
+- Absolute Trajectory Error,
+- Relative Pose Error,
+- number of matched poses.
+
+See `docs/orbslam3_euroc_setup.md` for setup details.
+
 ## Initial System Concept
 
-The first version of the system will use:
+The first version of the system uses:
 
 - RGB camera input,
 - IMU measurements,
@@ -56,7 +117,7 @@ Initial evaluation will focus on public robotics datasets such as:
 
 ## Evaluation Metrics
 
-The project will evaluate robustness and accuracy using:
+The project evaluates robustness and accuracy using:
 
 - Absolute Trajectory Error (ATE),
 - Relative Pose Error (RPE),
@@ -106,19 +167,20 @@ The intended contributions are:
 
 ```text
 .
-├── docs/                  # Research notes, design documents, and experiment plans
+├── configs/               # Experiment configurations
+├── docs/                  # Research notes and setup guides
+├── paper/                 # Paper scaffold
 ├── scripts/               # Dataset preparation and degradation tools
 ├── src/                   # Core research modules
-├── configs/               # Experiment configurations
-├── results/               # Evaluation summaries and plots
+├── tests/                 # Unit and smoke tests
+├── run_experiment.py      # Dummy end-to-end adaptive SLAM experiment
+├── run_orbslam3_experiment.py
 └── README.md
 ```
 
 ## Status
 
-This repository is at the initial research-planning stage.
-
-The immediate next step is to implement the benchmark and degradation pipeline before adding the adaptive uncertainty-aware fusion module.
+This repository is transitioning from research scaffold to real benchmark framework. The current priority is robust ORB-SLAM3 EuRoC baseline evaluation before adding adaptive/self-healing behavior to real SLAM outputs.
 
 ## Long-Term Vision
 
