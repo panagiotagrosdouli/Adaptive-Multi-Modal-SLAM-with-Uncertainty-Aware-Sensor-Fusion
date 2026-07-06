@@ -1,0 +1,23 @@
+experiment_name: self_healing_slam_health_monitor_baseline
+
+health_monitor:
+  warning_threshold: 0.55
+  critical_threshold: 0.30
+  feature_target: 200
+  max_reprojection_error: 8.0
+
+recovery:
+  critical_action: emergency_relocalization
+  warning_strategy: policy_action
+  normal_action: continue_normal_operation
+
+state_machine:
+  states:
+    - normal
+    - adaptive
+    - recovery
+
+research_questions:
+  - Can online SLAM health estimation predict degradation before tracking failure?
+  - Does recovery activation reduce ATE and RPE under controlled degradation?
+  - How much runtime overhead does self-healing introduce?
