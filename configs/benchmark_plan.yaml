@@ -1,0 +1,22 @@
+name: euroc_clean_degraded_self_healing_benchmark
+
+runs:
+  - name: dummy_adaptive_pipeline
+    kind: dummy
+    config: configs/example_experiment.yaml
+    enabled: true
+
+  - name: orbslam3_clean_mh01
+    kind: orbslam3
+    config: configs/orbslam3_euroc.yaml
+    enabled: false
+
+  - name: euroc_low_light_motion_blur
+    kind: degradation
+    config: configs/degradation_low_light_blur.yaml
+    enabled: false
+
+  - name: self_healing_health_monitor
+    kind: self_healing
+    config: configs/self_healing.yaml
+    enabled: true
