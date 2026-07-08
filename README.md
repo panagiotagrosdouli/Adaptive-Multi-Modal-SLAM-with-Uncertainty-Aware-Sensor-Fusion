@@ -1,54 +1,93 @@
 # Adaptive Multi-Modal SLAM with Uncertainty-Aware Sensor Fusion
 
-A research-oriented robotics project investigating how autonomous systems can adaptively fuse visual, inertial, and event-based sensing under challenging conditions such as motion blur, low illumination, texture scarcity, and rapid camera motion.
+Research software for studying **online sensor reliability estimation** and **adaptive fusion policies** in visual, inertial, and event/depth-enabled SLAM pipelines.
 
-The long-term objective is to evolve this system into **Self-Healing SLAM**: a SLAM pipeline that can anticipate tracking degradation, diagnose the likely cause, and adapt its sensing or estimation strategy before catastrophic failure.
+The project investigates a concrete question:
 
-## Research Positioning
+> Can a SLAM system estimate modality reliability online and adapt its fusion strategy before perceptual degradation becomes catastrophic tracking failure?
 
-This repository supports a broader research direction in **robust robotic perception under uncertainty**. It is positioned as the SLAM/sensor-fusion counterpart of [`SHIELD-VIO`](https://github.com/panagiotagrosdouli/SHIELD-VIO): while SHIELD-VIO focuses on degradation monitoring and recovery for visual-inertial odometry, this repository focuses on adaptive multi-modal SLAM and uncertainty-aware sensor fusion.
+This repository is intentionally claim-disciplined. It provides reusable modules, evaluation utilities, documentation, and experiment structure for adaptive SLAM research. It does **not** claim state-of-the-art benchmark performance until results are backed by committed configurations, metric files, and reproduction commands.
 
-The intended contribution is not simply another SLAM implementation. The goal is to study whether an autonomous system can estimate the reliability of each sensing modality online and use that estimate to adapt its state-estimation pipeline before severe degradation occurs.
+---
 
-## Core Research Question
+## Research motivation
 
-> Can a visual-inertial SLAM system estimate sensor reliability online and dynamically adapt its fusion strategy to improve robustness under perceptual degradation?
+Visual and visual-inertial SLAM systems often fail when their frontend assumptions are violated: motion blur, weak texture, poor illumination, dynamic objects, sensor dropout, timestamp errors, or aggressive motion. Classical pipelines typically process measurements with fixed noise assumptions, even when the current sensor stream is visibly unreliable.
 
-## Motivation
+This project studies an adaptive alternative:
 
-Classical visual SLAM and visual-inertial odometry systems often degrade sharply when their visual assumptions are violated. Examples include:
+```math
+Ω_i(k) = α_i(k) Σ_i^{-1},
+```
 
-- motion blur during aggressive UAV maneuvers,
-- poor illumination,
-- low-texture environments,
-- dynamic objects,
-- sensor dropout,
-- strong viewpoint changes.
+where `Σ_i` is a nominal modality covariance and `α_i(k)` is an online reliability-derived information weight. The goal is to make sensor trust an explicit, measurable quantity in the estimation pipeline.
 
-Instead of treating all sensor measurements as equally reliable, this project explores **uncertainty-aware adaptive fusion**, where the system estimates the reliability of each sensing modality and adjusts its contribution to state estimation in real time.
+---
 
-## Current Capabilities
+## Implemented capabilities
 
 The repository currently includes:
 
-- a reproducible YAML-based experiment runner,
-- uncertainty estimation and adaptive fusion modules,
-- failure prediction and recovery-policy skeletons,
-- EuRoC image, IMU, and ground-truth trajectory parsing,
-- trajectory matching and ATE/RPE evaluation,
-- plotting utilities for experiment logs,
-- an ORB-SLAM3 EuRoC backend wrapper,
-- CI tests for core research modules.
+- YAML-based experiment execution;
+- uncertainty and reliability estimation for visual and inertial modalities;
+- precision-based adaptive fusion weights;
+- interpretable logistic failure-risk prediction;
+- covariance utilities including Mahalanobis distance and Gaussian entropy;
+- trajectory association and evaluation with ATE/RPE;
+- Umeyama SE(3)/Sim(3) alignment for trajectory metrics;
+- EuRoC parsing and ORB-SLAM3 wrapper direction;
+- plotting utilities for reliability, fusion weights, and failure risk;
+- reproducibility manifest support;
+- research documentation, benchmark protocol, CI, and tests.
 
-## Quick Start
+---
 
-Install dependencies:
+## Repository structure
 
-```bash
-pip install -r requirements.txt
+```text
+.
+├── benchmark/             # Benchmark protocol and reporting conventions
+├── configs/               # Experiment configurations
+├── docs/                  # Theory, audit, setup, and research notes
+├── experiments/           # Experiment registry guidance
+├── paper/                 # Paper scaffold
+├── scripts/               # Dataset preparation and degradation utilities
+├── src/                   # Core research modules
+├── tests/                 # Unit and smoke tests
+├── .github/               # CI, PR template, issue templates
+├── CONTRIBUTING.md        # Research software contribution policy
+├── SECURITY.md            # Safety and responsible-use policy
+├── pyproject.toml         # Black, Ruff, pytest, coverage configuration
+├── run_experiment.py      # Adaptive SLAM experiment runner
+└── run_orbslam3_experiment.py
 ```
 
-Run the dummy end-to-end adaptive SLAM pipeline:
+Planned top-level directories for future extensions include `datasets/`, `examples/`, `visualization/`, `notebooks/`, `assets/`, `docker/`, and `website/`. Large datasets and generated videos should remain outside Git history unless they are small illustrative artifacts.
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/panagiotagrosdouli/Adaptive-Multi-Modal-SLAM-with-Uncertainty-Aware-Sensor-Fusion.git
+cd Adaptive-Multi-Modal-SLAM-with-Uncertainty-Aware-Sensor-Fusion
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+```
+
+For minimal usage without development tools:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+---
+
+## Quick start
+
+Run the adaptive SLAM smoke experiment:
 
 ```bash
 python run_experiment.py --config configs/example_experiment.yaml
@@ -63,10 +102,19 @@ python generate_plots.py results/euroc_degraded_adaptive_fusion_baseline.json
 Run tests:
 
 ```bash
-pytest -q
+pytest
 ```
 
-## ORB-SLAM3 EuRoC Baseline
+Run formatting and lint checks:
+
+```bash
+ruff check src tests scripts
+black --check src tests scripts
+```
+
+---
+
+## ORB-SLAM3 EuRoC baseline
 
 This repository does not vendor ORB-SLAM3. Build ORB-SLAM3 separately, download EuRoC MAV, then edit:
 
@@ -74,134 +122,154 @@ This repository does not vendor ORB-SLAM3. Build ORB-SLAM3 separately, download 
 configs/orbslam3_euroc.yaml
 ```
 
-Run a real ORB-SLAM3 baseline:
+Run the ORB-SLAM3 EuRoC wrapper:
 
 ```bash
 python run_orbslam3_experiment.py --config configs/orbslam3_euroc.yaml
 ```
 
-If a EuRoC ground-truth CSV is configured, the script computes:
+If ground truth is configured, the script computes:
 
-- Absolute Trajectory Error,
-- Relative Pose Error,
-- number of matched poses.
+- matched poses;
+- Absolute Trajectory Error;
+- Relative Pose Error.
 
-See `docs/orbslam3_euroc_setup.md` for setup details.
+See `docs/orbslam3_euroc_setup.md` for backend setup details.
 
-## Initial System Concept
+---
 
-The first version of the system uses:
+## Method overview
 
-- RGB camera input,
-- IMU measurements,
-- optional event-camera input or event-camera simulation,
-- a baseline SLAM/VIO backend,
-- an uncertainty estimator,
-- an adaptive fusion module.
+### 1. Reliability estimation
 
-The system should learn or infer when visual tracking is becoming unreliable and compensate by increasing reliance on inertial or event-based information.
+The visual reliability baseline combines feature count, reprojection quality, brightness, sharpness, and optional optical-flow consistency. The inertial reliability baseline uses acceleration plausibility, gyroscope magnitude, optional preintegration residuals, and optional bias stability.
 
-## Planned Baselines
+These are transparent reliability signals, not learned uncertainty claims. They are designed to be calibrated later against trajectory error, innovation consistency, and tracking failure.
 
-Potential baselines include:
+### 2. Adaptive fusion
 
-- ORB-SLAM3,
-- VINS-Fusion,
-- OpenVINS,
-- DSO or LDSO,
-- visual-inertial pipelines evaluated on standard datasets.
+Reliability is mapped to pseudo-precision:
 
-## Target Datasets
+```math
+p_i = max(ε, r_i)^γ / σ_i^2,
+w_i = p_i / Σ_j p_j.
+```
 
-Initial evaluation will focus on public robotics datasets such as:
+This is closer to weighted least-squares intuition than directly normalizing reliabilities. A full estimator should ultimately modify measurement covariances or factor-graph information matrices directly.
 
-- EuRoC MAV,
-- TUM-VI,
-- ADVIO,
-- Event Camera Dataset,
-- synthetic degraded sequences generated from existing visual-inertial datasets.
+### 3. Failure prediction
 
-## Evaluation Metrics
+Failure risk is modeled with an interpretable logistic baseline over visual reliability, inertial reliability, reprojection error, and feature depletion. This model is monotonic and transparent, but it should not be described as calibrated probability until validated on held-out degradation sequences.
 
-The project evaluates robustness and accuracy using:
+### 4. Trajectory evaluation
 
-- Absolute Trajectory Error (ATE),
-- Relative Pose Error (RPE),
-- tracking failure rate,
-- relocalization frequency,
-- degradation recovery time,
-- uncertainty calibration,
-- computational cost.
+ATE and RPE must specify timestamp association and alignment:
 
-## Intended Research Contributions
+- `none`: no alignment;
+- `se3`: rigid alignment;
+- `sim3`: similarity alignment with scale.
 
-1. A modular SLAM pipeline with uncertainty-aware sensor reliability estimation.
-2. A dynamic fusion policy that adapts to degraded visual conditions.
-3. A benchmark protocol for testing SLAM robustness under controlled perceptual degradation.
-4. A path toward Self-Healing SLAM through failure prediction and recovery strategies.
+Monocular-only systems may report Sim(3) alignment. Stereo, RGB-D, and visual-inertial systems should report SE(3) or no-scale alignment to preserve metric-scale accountability.
+
+---
+
+## Benchmark protocol
+
+See `benchmark/README.md` for the benchmark policy. Target datasets include:
+
+| Dataset | Purpose |
+| --- | --- |
+| EuRoC MAV | stereo-inertial VIO/SLAM |
+| TUM-VI | visual-inertial robustness |
+| KITTI Odometry | outdoor visual odometry |
+| TUM RGB-D | RGB-D SLAM and depth fusion |
+| Event Camera Dataset | event-based reliability studies |
+
+Every reported benchmark should include dataset sequence, backend version, sensor setup, matched poses, ATE, RPE, alignment convention, runtime, failure count, and a reproduction manifest.
+
+---
+
+## Documentation
+
+- `docs/THEORY.md` — mathematical formulation and uncertainty interpretation.
+- `docs/RESEARCH_AUDIT.md` — repository weaknesses, upgrades, and remaining work.
+- `benchmark/README.md` — benchmark protocol and claim discipline.
+- `experiments/README.md` — experiment registry expectations.
+- `CONTRIBUTING.md` — contribution rules for research software.
+- `SECURITY.md` — safety and responsible-use policy.
+
+---
+
+## Development standards
+
+The repository uses:
+
+- Python 3.10+;
+- Black formatting;
+- Ruff linting;
+- pytest and coverage;
+- type hints for new code;
+- Google-style docstrings;
+- explicit numerical validation for metric and uncertainty code;
+- CI for tests and quality checks.
+
+---
 
 ## Roadmap
 
-### Phase 1: Baseline and Benchmarking
+### Phase 1 — Baseline reproducibility
 
-- Set up baseline SLAM/VIO system.
-- Run experiments on EuRoC and TUM-VI.
-- Create degradation scripts for blur, low light, noise, and texture loss.
-- Establish reproducible evaluation metrics.
+- Run ORB-SLAM3 on EuRoC sequences.
+- Store reproducible configs and manifests.
+- Generate ATE/RPE tables and trajectory plots.
 
-### Phase 2: Uncertainty Estimation
+### Phase 2 — Reliability calibration
 
-- Estimate visual tracking confidence from feature quality, reprojection error, optical flow consistency, and IMU residuals.
-- Add learned or probabilistic uncertainty estimation.
-- Calibrate uncertainty against actual tracking performance.
+- Extract real frontend quality signals from ORB-SLAM3/OpenVINS outputs.
+- Calibrate reliability against tracking failure and trajectory error.
+- Add uncertainty heatmaps and covariance visualizations.
 
-### Phase 3: Adaptive Fusion
+### Phase 3 — Adaptive fusion in real backends
 
-- Dynamically adjust sensor weighting based on uncertainty.
-- Compare fixed fusion, heuristic adaptive fusion, and learned adaptive fusion.
-- Evaluate robustness under degraded conditions.
+- Connect reliability to covariance/information weighting.
+- Compare fixed fusion, heuristic adaptive fusion, and learned weighting.
+- Evaluate under controlled blur, low-light, noise, and feature-drop degradation.
 
-### Phase 4: Toward Self-Healing SLAM
+### Phase 4 — Toward self-healing SLAM
 
-- Predict tracking failure before it occurs.
-- Diagnose probable failure causes.
-- Trigger recovery policies such as relocalization, sensor reweighting, keyframe strategy changes, or active viewpoint adjustment.
+- Predict failure before tracking loss.
+- Diagnose likely degradation causes.
+- Trigger recovery policies such as relocalization, keyframe adjustment, modality reweighting, or active viewpoint changes.
 
-## Relationship to Broader Robotics Portfolio
+---
 
-This repository complements:
+## Scope and limitations
 
-- [`SHIELD-VIO`](https://github.com/panagiotagrosdouli/SHIELD-VIO), which focuses on degradation diagnosis and recovery for VIO.
-- [`DynNav`](https://github.com/panagiotagrosdouli/DynNav-Dynamic-Navigation-Rerouting-in-Unknown-Environments), which studies risk-aware navigation under map uncertainty.
-- [`Uncertainty-Aware Navigation`](https://github.com/panagiotagrosdouli/uncertainty-aware-navigation), which provides a focused planning benchmark around uncertainty-weighted navigation.
+The current repository is a research framework and benchmark scaffold. It contains mathematically grounded utilities and experiment infrastructure, but public benchmark claims must wait until real dataset runs are committed with metrics and manifests. This separation protects scientific credibility.
 
-Together, these repositories form a research arc from **perception reliability** to **localization robustness** to **risk-aware planning**.
+---
 
-## Repository Structure
+## Citation
 
-```text
-.
-├── configs/               # Experiment configurations
-├── docs/                  # Research notes and setup guides
-├── paper/                 # Paper scaffold
-├── scripts/               # Dataset preparation and degradation tools
-├── src/                   # Core research modules
-├── tests/                 # Unit and smoke tests
-├── run_experiment.py      # Dummy end-to-end adaptive SLAM experiment
-├── run_orbslam3_experiment.py
-└── README.md
+If this repository supports academic work, cite it as research software:
+
+```bibtex
+@software{grosdouli_adaptive_multimodal_slam_2026,
+  title = {Adaptive Multi-Modal SLAM with Uncertainty-Aware Sensor Fusion},
+  author = {Grosdouli, Panagiota},
+  year = {2026},
+  url = {https://github.com/panagiotagrosdouli/Adaptive-Multi-Modal-SLAM-with-Uncertainty-Aware-Sensor-Fusion}
+}
 ```
 
-## Status
+---
 
-This repository is transitioning from research scaffold to real benchmark framework. The current priority is robust ORB-SLAM3 EuRoC baseline evaluation before adding adaptive/self-healing behavior to real SLAM outputs.
+## License
 
-## Scope and Claims
+See `LICENSE` if present. If no license file is included, add one before external reuse.
 
-This project separates implemented modules, baseline wrappers, and planned extensions explicitly. Reported claims should be tied to reproducible experiments, datasets, metrics, and configuration files.
+---
 
-## Long-Term Vision
+## Acknowledgements
 
-The final ambition is a robust autonomous perception system that does not passively fail when visual conditions degrade, but actively detects, anticipates, and mitigates failure.
-
-This is the foundation for **Self-Healing SLAM**.
+This repository is conceptually aligned with open research in visual SLAM, visual-inertial odometry, robust perception, and uncertainty-aware robotics. It is designed to interoperate with established systems rather than replace them without evidence.
