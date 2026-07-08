@@ -7,8 +7,8 @@ on:
     branches: [main]
 
 jobs:
-  phases:
-    name: Executable research phases / Python ${{ matrix.python-version }}
+  quality:
+    name: Quality / Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -29,7 +29,16 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
 
-      - name: Run all executable phases
+      - name: Ruff lint
+        run: ruff check slam_fusion src tests scripts
+
+      - name: Black format check
+        run: black --check slam_fusion src tests scripts
+
+      - name: Pytest
+        run: pytest
+
+      - name: Run executable research phases
         run: python scripts/run_all_phases.py
 
       - name: Upload phase artifacts
