@@ -44,7 +44,7 @@ src = ["slam_fusion", "src", "tests", "scripts"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "SIM", "C4", "RUF"]
-ignore = ["E501"]
+ignore = ["E501", "I001"]
 
 [tool.pytest.ini_options]
 minversion = "8.0"
