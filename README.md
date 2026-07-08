@@ -4,6 +4,12 @@ A research-oriented robotics project investigating how autonomous systems can ad
 
 The long-term objective is to evolve this system into **Self-Healing SLAM**: a SLAM pipeline that can anticipate tracking degradation, diagnose the likely cause, and adapt its sensing or estimation strategy before catastrophic failure.
 
+## PhD-Level Research Positioning
+
+This repository supports a broader research direction in **robust robotic perception under uncertainty**. It is positioned as the SLAM/sensor-fusion counterpart of [`SHIELD-VIO`](https://github.com/panagiotagrosdouli/SHIELD-VIO): while SHIELD-VIO focuses on degradation monitoring and recovery for visual-inertial odometry, this repository focuses on adaptive multi-modal SLAM and uncertainty-aware sensor fusion.
+
+The intended research contribution is not simply another SLAM implementation. The goal is to study whether an autonomous system can estimate the reliability of each sensing modality online and use that estimate to adapt its state-estimation pipeline before severe degradation occurs.
+
 ## Core Research Question
 
 > Can a visual-inertial SLAM system estimate sensor reliability online and dynamically adapt its fusion strategy to improve robustness under perceptual degradation?
@@ -162,6 +168,16 @@ The intended contributions are:
 - Predict tracking failure before it occurs.
 - Diagnose probable failure causes.
 - Trigger recovery policies such as relocalization, sensor reweighting, keyframe strategy changes, or active viewpoint adjustment.
+
+## Relationship to Broader Robotics Portfolio
+
+This repository complements:
+
+- [`SHIELD-VIO`](https://github.com/panagiotagrosdouli/SHIELD-VIO), which focuses on degradation diagnosis and recovery for VIO.
+- [`DynNav`](https://github.com/panagiotagrosdouli/DynNav-Dynamic-Navigation-Rerouting-in-Unknown-Environments), which studies risk-aware navigation under map uncertainty.
+- [`Uncertainty-Aware Navigation`](https://github.com/panagiotagrosdouli/uncertainty-aware-navigation), which provides a focused planning benchmark around uncertainty-weighted navigation.
+
+Together, these repositories form a PhD-oriented research arc from **perception reliability** to **localization robustness** to **risk-aware planning**.
 
 ## Repository Structure
 
