@@ -15,6 +15,8 @@ import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+QUALITY_PATHS = ["slam_fusion", "src", "tests", "scripts"]
+
 
 @dataclass(frozen=True)
 class PhaseResult:
@@ -130,24 +132,24 @@ def run_lint_phases(results: list[PhaseResult]) -> None:
     """Run formatting and linting phases when tools are installed."""
 
     if shutil.which("ruff"):
-        results.append(run_command(["ruff", "check", "src", "tests", "scripts"]))
+        results.append(run_command(["ruff", "check", *QUALITY_PATHS]))
     else:
         results.append(
             PhaseResult(
                 name="ruff",
                 status="skipped_with_reason",
-                command="ruff check src tests scripts",
+                command=f"ruff check {' '.join(QUALITY_PATHS)}",
                 reason="Ruff is not installed in this environment.",
             )
         )
     if shutil.which("black"):
-        results.append(run_command(["black", "--check", "src", "tests", "scripts"]))
+        results.append(run_command(["black", "--check", *QUALITY_PATHS]))
     else:
         results.append(
             PhaseResult(
                 name="black",
                 status="skipped_with_reason",
-                command="black --check src tests scripts",
+                command=f"black --check {' '.join(QUALITY_PATHS)}",
                 reason="Black is not installed in this environment.",
             )
         )
