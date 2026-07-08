@@ -229,7 +229,7 @@ class AdaptiveSensorFusion:
             if self._validate_reliability(value, name=key) > 0.0
         }
         if not active_reliabilities:
-            return {key: 0.0 for key in reliabilities}
+            return dict.fromkeys(reliabilities, 0.0)
         active_variances = {key: variances[key] for key in active_reliabilities}
         active_weights = self.precision_weights(active_reliabilities, active_variances)
         return {key: active_weights.get(key, 0.0) for key in reliabilities}
