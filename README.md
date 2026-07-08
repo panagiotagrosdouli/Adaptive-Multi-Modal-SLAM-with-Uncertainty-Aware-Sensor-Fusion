@@ -4,11 +4,11 @@ A research-oriented robotics project investigating how autonomous systems can ad
 
 The long-term objective is to evolve this system into **Self-Healing SLAM**: a SLAM pipeline that can anticipate tracking degradation, diagnose the likely cause, and adapt its sensing or estimation strategy before catastrophic failure.
 
-## PhD-Level Research Positioning
+## Research Positioning
 
 This repository supports a broader research direction in **robust robotic perception under uncertainty**. It is positioned as the SLAM/sensor-fusion counterpart of [`SHIELD-VIO`](https://github.com/panagiotagrosdouli/SHIELD-VIO): while SHIELD-VIO focuses on degradation monitoring and recovery for visual-inertial odometry, this repository focuses on adaptive multi-modal SLAM and uncertainty-aware sensor fusion.
 
-The intended research contribution is not simply another SLAM implementation. The goal is to study whether an autonomous system can estimate the reliability of each sensing modality online and use that estimate to adapt its state-estimation pipeline before severe degradation occurs.
+The intended contribution is not simply another SLAM implementation. The goal is to study whether an autonomous system can estimate the reliability of each sensing modality online and use that estimate to adapt its state-estimation pipeline before severe degradation occurs.
 
 ## Core Research Question
 
@@ -133,9 +133,7 @@ The project evaluates robustness and accuracy using:
 - uncertainty calibration,
 - computational cost.
 
-## Research Contributions
-
-The intended contributions are:
+## Intended Research Contributions
 
 1. A modular SLAM pipeline with uncertainty-aware sensor reliability estimation.
 2. A dynamic fusion policy that adapts to degraded visual conditions.
@@ -177,7 +175,7 @@ This repository complements:
 - [`DynNav`](https://github.com/panagiotagrosdouli/DynNav-Dynamic-Navigation-Rerouting-in-Unknown-Environments), which studies risk-aware navigation under map uncertainty.
 - [`Uncertainty-Aware Navigation`](https://github.com/panagiotagrosdouli/uncertainty-aware-navigation), which provides a focused planning benchmark around uncertainty-weighted navigation.
 
-Together, these repositories form a PhD-oriented research arc from **perception reliability** to **localization robustness** to **risk-aware planning**.
+Together, these repositories form a research arc from **perception reliability** to **localization robustness** to **risk-aware planning**.
 
 ## Repository Structure
 
@@ -197,6 +195,10 @@ Together, these repositories form a PhD-oriented research arc from **perception 
 ## Status
 
 This repository is transitioning from research scaffold to real benchmark framework. The current priority is robust ORB-SLAM3 EuRoC baseline evaluation before adding adaptive/self-healing behavior to real SLAM outputs.
+
+## Scope and Claims
+
+This project separates implemented modules, baseline wrappers, and planned extensions explicitly. Reported claims should be tied to reproducible experiments, datasets, metrics, and configuration files.
 
 ## Long-Term Vision
 
