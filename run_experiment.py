@@ -1,3 +1,7 @@
+"""Run the adaptive multi-modal SLAM smoke experiment."""
+
+from __future__ import annotations
+
 import argparse
 from pathlib import Path
 
@@ -17,31 +21,35 @@ from src.uncertainty_estimator import (
 from src.visualization import generate_all_plots
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='Run adaptive multi-modal SLAM experiment.')
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
+
+    parser = argparse.ArgumentParser(description="Run adaptive multi-modal SLAM experiment.")
     parser.add_argument(
-        '--config',
-        default='configs/example_experiment.yaml',
-        help='Path to YAML experiment configuration.',
+        "--config",
+        default="configs/example_experiment.yaml",
+        help="Path to YAML experiment configuration.",
     )
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
+    """Run the configured smoke experiment and write reproducibility artifacts."""
+
     args = parse_args()
     config = load_config(args.config)
 
-    uncertainty_cfg = config.raw.get('uncertainty_estimation', {})
-    fusion_cfg = config.raw.get('adaptive_fusion', {})
+    uncertainty_cfg = config.raw.get("uncertainty_estimation", {})
+    fusion_cfg = config.raw.get("adaptive_fusion", {})
 
     backend = DummySlamBackend()
     uncertainty = UncertaintyEstimator(
-        min_features=uncertainty_cfg.get('min_features', 50),
-        target_features=uncertainty_cfg.get('target_features', 200),
-        max_reprojection_error=uncertainty_cfg.get('max_reprojection_error', 5.0),
+        min_features=uncertainty_cfg.get("min_features", 50),
+        target_features=uncertainty_cfg.get("target_features", 200),
+        max_reprojection_error=uncertainty_cfg.get("max_reprojection_error", 5.0),
     )
     fusion = AdaptiveFusionPolicy(
-        minimum_weight=fusion_cfg.get('minimum_weight', 0.05),
+        minimum_weight=fusion_cfg.get("minimum_weight", 0.05),
     )
     predictor = FailurePredictor()
     recovery = RecoveryPolicy()
@@ -49,7 +57,7 @@ def main():
 
     backend.initialize()
     state = SystemState()
-    experiment_log = []
+    experiment_log: list[dict[str, object]] = []
 
     for step in range(20):
         observation = SlamObservation(timestamp=float(step))
@@ -91,50 +99,50 @@ def main():
 
         experiment_log.append(
             {
-                'experiment_name': config.name,
-                'dataset': config.dataset_name,
-                'baseline': config.baseline_system,
-                'step': step,
-                'timestamp': slam_result.timestamp,
-                'position': slam_result.position.tolist(),
-                'mode': state.active_mode,
-                'visual_reliability': reliability.visual,
-                'inertial_reliability': reliability.inertial,
-                'visual_weight': weights.visual,
-                'inertial_weight': weights.inertial,
-                'failure_probability': failure_probability,
-                'recovery_action': action.name,
-                'recovery_reason': action.reason,
+                "experiment_name": config.name,
+                "dataset": config.dataset_name,
+                "baseline": config.baseline_system,
+                "step": step,
+                "timestamp": slam_result.timestamp,
+                "position": slam_result.position.tolist(),
+                "mode": state.active_mode,
+                "visual_reliability": reliability.visual,
+                "inertial_reliability": reliability.inertial,
+                "visual_weight": weights.visual,
+                "inertial_weight": weights.inertial,
+                "failure_probability": failure_probability,
+                "recovery_action": action.name,
+                "recovery_reason": action.reason,
             }
         )
 
-    logger.save_metrics(config.name, {'steps': experiment_log})
-    result_path = Path('results') / f'{config.name}.json'
-    plot_dir = Path('results') / 'plots' / config.name
+    logger.save_metrics(config.name, {"steps": experiment_log})
+    result_path = Path("results") / f"{config.name}.json"
+    plot_dir = Path("results") / "plots" / config.name
     generate_all_plots(result_path, plot_dir)
 
-    manifest_path = Path('results') / 'manifests' / f'{config.name}_manifest.json'
+    manifest_path = Path("results") / "manifests" / f"{config.name}_manifest.json"
     manifest = create_manifest(
         experiment_name=config.name,
         config_path=args.config,
         outputs=[
             str(result_path),
-            str(plot_dir / 'failure_probability.png'),
-            str(plot_dir / 'reliability.png'),
-            str(plot_dir / 'fusion_weights.png'),
+            str(plot_dir / "failure_probability.png"),
+            str(plot_dir / "reliability.png"),
+            str(plot_dir / "fusion_weights.png"),
         ],
         metadata={
-            'dataset': config.dataset_name,
-            'baseline': config.baseline_system,
+            "dataset": config.dataset_name,
+            "baseline": config.baseline_system,
         },
     )
     save_manifest(manifest, manifest_path)
 
     backend.shutdown()
-    print(f'Experiment completed: {config.name}')
-    print(f'Results written to: {result_path}')
-    print(f'Manifest written to: {manifest_path}')
+    print(f"Experiment completed: {config.name}")
+    print(f"Results written to: {result_path}")
+    print(f"Manifest written to: {manifest_path}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
