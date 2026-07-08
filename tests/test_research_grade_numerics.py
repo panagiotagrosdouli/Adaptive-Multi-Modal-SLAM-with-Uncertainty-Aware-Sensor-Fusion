@@ -58,4 +58,9 @@ def test_covariance_based_uncertainty_metrics_are_finite_for_spd_matrix():
 
 def test_risk_score_validates_gate_threshold():
     with pytest.raises(UncertaintyMetricError):
-        risk_score(np.eye(2), min_reliability=0.5, innovation_distance=1.0, gate_threshold=0.0)
+        risk_score(
+            np.eye(2),
+            min_reliability=0.5,
+            innovation_distance=1.0,
+            gate_threshold=0.0,
+        )
