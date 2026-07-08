@@ -191,6 +191,28 @@ def run_media_phase(results: list[PhaseResult], experiment_name: str) -> None:
     )
 
 
+def run_benchmark_reporting_phase(results: list[PhaseResult]) -> None:
+    """Validate benchmark schema and deterministic table generation."""
+
+    example_metric = "benchmark/example_metric.json"
+    results.append(
+        run_command([sys.executable, "scripts/validate_benchmark_metrics.py", example_metric])
+    )
+    results.append(
+        run_command(
+            [
+                sys.executable,
+                "scripts/generate_benchmark_table.py",
+                example_metric,
+                "--output-dir",
+                "results/tables",
+            ]
+        )
+    )
+    results.append(assert_exists(Path("results/tables/benchmark_table.md"), label="benchmark_md"))
+    results.append(assert_exists(Path("results/tables/benchmark_table.tex"), label="benchmark_latex"))
+
+
 def main() -> None:
     """Run all executable phases."""
 
@@ -208,6 +230,7 @@ def main() -> None:
     if not args.skip_media:
         run_media_phase(results, experiment_name)
 
+    run_benchmark_reporting_phase(results)
     results.append(dataset_phase(Path(args.dataset_root)))
 
     report_path = Path("results/phase_report.json")
