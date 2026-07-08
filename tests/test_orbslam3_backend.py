@@ -4,15 +4,15 @@ from src.backends.orbslam3_backend import OrbSlam3Backend, OrbSlam3Config
 
 
 def make_config(tmp_path):
-    executable = tmp_path / 'orbslam3_euroc'
-    vocabulary = tmp_path / 'ORBvoc.txt'
-    settings = tmp_path / 'EuRoC.yaml'
-    sequence_path = tmp_path / 'MH_01_easy'
-    output_trajectory = tmp_path / 'results' / 'trajectory.csv'
+    executable = tmp_path / "orbslam3_euroc"
+    vocabulary = tmp_path / "ORBvoc.txt"
+    settings = tmp_path / "EuRoC.yaml"
+    sequence_path = tmp_path / "MH_01_easy"
+    output_trajectory = tmp_path / "results" / "trajectory.csv"
 
-    executable.write_text('#!/bin/sh\n')
-    vocabulary.write_text('vocab')
-    settings.write_text('settings')
+    executable.write_text("#!/bin/sh\n")
+    vocabulary.write_text("vocab")
+    settings.write_text("settings")
     sequence_path.mkdir()
 
     return OrbSlam3Config(
@@ -47,7 +47,7 @@ def test_orbslam3_path_validation_accepts_existing_paths(tmp_path):
 
 def test_orbslam3_path_validation_rejects_missing_executable(tmp_path):
     config = make_config(tmp_path)
-    config.executable = tmp_path / 'missing_orbslam3'
+    config.executable = tmp_path / "missing_orbslam3"
     backend = OrbSlam3Backend(config)
 
     with pytest.raises(FileNotFoundError):
