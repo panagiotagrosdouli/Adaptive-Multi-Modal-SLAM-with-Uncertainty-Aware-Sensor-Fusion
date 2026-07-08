@@ -1,8 +1,8 @@
 """Generate publication-oriented trajectory and uncertainty animations.
 
 The script consumes the JSON output produced by `run_experiment.py` and writes
-MP4/GIF animations without inventing new experiment data.  If optional video
-writers are unavailable, it still produces an SVG trajectory figure.
+GIF animations without inventing new experiment data. If optional video writers
+are unavailable, it still produces an SVG trajectory figure.
 """
 
 from __future__ import annotations
@@ -23,8 +23,14 @@ LOGGER = logging.getLogger(__name__)
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
 
-    parser = argparse.ArgumentParser(description="Generate SLAM research media from experiment logs.")
-    parser.add_argument("input", type=Path, help="Path to experiment JSON produced by run_experiment.py.")
+    parser = argparse.ArgumentParser(
+        description="Generate SLAM research media from experiment logs.",
+    )
+    parser.add_argument(
+        "input",
+        type=Path,
+        help="Path to experiment JSON produced by run_experiment.py.",
+    )
     parser.add_argument("--output-dir", type=Path, default=Path("results/videos"))
     parser.add_argument("--fps", type=int, default=10)
     parser.add_argument("--dpi", type=int, default=160)
@@ -40,7 +46,9 @@ def load_steps(path: Path) -> list[dict[str, Any]]:
         payload = json.load(file)
     steps = payload.get("steps", payload if isinstance(payload, list) else None)
     if not isinstance(steps, list) or not steps:
-        raise ValueError("Input JSON must contain a non-empty 'steps' list or be a list of steps.")
+        raise ValueError(
+            "Input JSON must contain a non-empty 'steps' list or be a list of steps."
+        )
     return steps
 
 
@@ -56,7 +64,11 @@ def extract_positions(steps: list[dict[str, Any]]) -> np.ndarray:
     return np.vstack(positions)
 
 
-def extract_series(steps: list[dict[str, Any]], key: str, default: float = 0.0) -> np.ndarray:
+def extract_series(
+    steps: list[dict[str, Any]],
+    key: str,
+    default: float = 0.0,
+) -> np.ndarray:
     """Extract a finite scalar series from experiment steps."""
 
     values = np.asarray([float(step.get(key, default)) for step in steps], dtype=np.float64)
@@ -102,8 +114,14 @@ def save_animation(
     trajectory_axis.grid(True, alpha=0.3)
 
     margin = 0.05 + 0.1 * np.ptp(positions[:, :2], axis=0)
-    trajectory_axis.set_xlim(positions[:, 0].min() - margin[0], positions[:, 0].max() + margin[0])
-    trajectory_axis.set_ylim(positions[:, 1].min() - margin[1], positions[:, 1].max() + margin[1])
+    trajectory_axis.set_xlim(
+        positions[:, 0].min() - margin[0],
+        positions[:, 0].max() + margin[0],
+    )
+    trajectory_axis.set_ylim(
+        positions[:, 1].min() - margin[1],
+        positions[:, 1].max() + margin[1],
+    )
 
     signal_axis.set_title("Reliability and failure risk")
     signal_axis.set_xlabel("step")
@@ -111,24 +129,30 @@ def save_animation(
     signal_axis.set_ylim(0.0, 1.05)
     signal_axis.grid(True, alpha=0.3)
 
-    trajectory_line, = trajectory_axis.plot([], [], linewidth=2)
-    current_point, = trajectory_axis.plot([], [], marker="o")
-    visual_line, = signal_axis.plot([], [], label="visual reliability")
-    failure_line, = signal_axis.plot([], [], label="failure probability")
+    (trajectory_line,) = trajectory_axis.plot([], [], linewidth=2)
+    (current_point,) = trajectory_axis.plot([], [], marker="o")
+    (visual_line,) = signal_axis.plot([], [], label="visual reliability")
+    (failure_line,) = signal_axis.plot([], [], label="failure probability")
     signal_axis.legend(loc="lower right")
 
-    steps = np.arange(len(positions))
+    step_indices = np.arange(len(positions))
 
     def update(frame: int) -> tuple[Any, ...]:
         end = frame + 1
         trajectory_line.set_data(positions[:end, 0], positions[:end, 1])
         current_point.set_data([positions[frame, 0]], [positions[frame, 1]])
-        visual_line.set_data(steps[:end], visual_reliability[:end])
-        failure_line.set_data(steps[:end], failure_probability[:end])
+        visual_line.set_data(step_indices[:end], visual_reliability[:end])
+        failure_line.set_data(step_indices[:end], failure_probability[:end])
         signal_axis.set_xlim(0, max(1, len(positions) - 1))
         return trajectory_line, current_point, visual_line, failure_line
 
-    animation = FuncAnimation(fig, update, frames=len(positions), interval=1000 / fps, blit=True)
+    animation = FuncAnimation(
+        fig,
+        update,
+        frames=len(positions),
+        interval=1000 / fps,
+        blit=True,
+    )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     animation.save(output_path, writer=PillowWriter(fps=fps), dpi=dpi)
     plt.close(fig)
@@ -163,7 +187,7 @@ def main() -> None:
             dpi=args.dpi,
         )
         LOGGER.info("Saved %s", gif_path)
-    except Exception as exc:  # pragma: no cover - depends on optional writer stack
+    except (OSError, ValueError, RuntimeError) as exc:
         LOGGER.warning("Could not save animation: %s", exc)
 
 
