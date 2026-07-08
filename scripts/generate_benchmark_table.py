@@ -142,10 +142,11 @@ def render_markdown(rows: list[BenchmarkRow]) -> str:
 def render_latex(rows: list[BenchmarkRow]) -> str:
     """Render rows as a compact LaTeX table."""
 
+    latex_newline = " " + chr(92) * 2
     lines = [
         "\\begin{tabular}{llllrrrr}",
         "\\toprule",
-        "Dataset & Sequence & Backend & Align & Matched & ATE & RPE & FPS \\\",
+        f"Dataset & Sequence & Backend & Align & Matched & ATE & RPE & FPS{latex_newline}",
         "\\midrule",
     ]
     for row in rows:
@@ -162,7 +163,8 @@ def render_latex(rows: list[BenchmarkRow]) -> str:
                     row.fps,
                 ]
             )
-            + " \\\")
+            + latex_newline
+        )
     lines.extend(["\\bottomrule", "\\end{tabular}"])
     return "\n".join(lines) + "\n"
 
