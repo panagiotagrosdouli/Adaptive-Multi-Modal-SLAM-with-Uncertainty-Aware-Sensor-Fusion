@@ -34,7 +34,9 @@ class BenchmarkRow:
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
 
-    parser = argparse.ArgumentParser(description="Generate benchmark tables from metric JSON files.")
+    parser = argparse.ArgumentParser(
+        description="Generate benchmark tables from metric JSON files."
+    )
     parser.add_argument(
         "inputs",
         nargs="+",
@@ -55,7 +57,9 @@ def discover_json_files(inputs: list[Path]) -> list[Path]:
         elif item.is_file() and item.suffix == ".json":
             files.append(item)
         else:
-            raise FileNotFoundError(f"Benchmark input is not a JSON file or directory: {item}")
+            raise FileNotFoundError(
+                f"Benchmark input is not a JSON file or directory: {item}"
+            )
     if not files:
         raise ValueError("No JSON metric files found.")
     return files
@@ -116,7 +120,8 @@ def render_markdown(rows: list[BenchmarkRow]) -> str:
     """Render rows as a Markdown table."""
 
     header = (
-        "| Dataset | Sequence | Backend | Align | Matched | ATE RMSE | RPE RMSE | FPS | Failures | Source |\n"
+        "| Dataset | Sequence | Backend | Align | Matched | ATE RMSE | RPE RMSE | "
+        "FPS | Failures | Source |\n"
         "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |"
     )
     body = [
