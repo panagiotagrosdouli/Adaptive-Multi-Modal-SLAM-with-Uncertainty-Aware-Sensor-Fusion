@@ -23,7 +23,11 @@ def generate_demo(output_gif: Path, output_mp4: Path, seed: int = 7, steps: int 
     output_mp4.parent.mkdir(parents=True, exist_ok=True)
     t = np.linspace(0.0, 2.0 * np.pi, steps)
     gt = np.column_stack([np.cos(t), np.sin(t)])
-    visual_rel = np.clip(0.9 - 0.65 * np.exp(-0.5 * ((np.arange(steps) - 45) / 9) ** 2), 0.05, 1.0)
+    visual_rel = np.clip(
+        0.9 - 0.65 * np.exp(-0.5 * ((np.arange(steps) - 45) / 9) ** 2),
+        0.05,
+        1.0,
+    )
     imu_rel = np.clip(0.75 + 0.05 * np.sin(t), 0.05, 1.0)
     lidar_rel = np.clip(0.85 - 0.5 * (np.arange(steps) > 58), 0.05, 1.0)
     fusion = AdaptiveSensorFusion()
@@ -32,7 +36,11 @@ def generate_demo(output_gif: Path, output_mp4: Path, seed: int = 7, steps: int 
     current = np.array([1.0, 0.0])
     for k in range(steps):
         w = fusion.dropout_weights(
-            {"camera": float(visual_rel[k]), "imu": float(imu_rel[k]), "lidar": float(lidar_rel[k])},
+            {
+                "camera": float(visual_rel[k]),
+                "imu": float(imu_rel[k]),
+                "lidar": float(lidar_rel[k]),
+            },
             {"camera": 0.04, "imu": 0.09, "lidar": 0.06},
         )
         weights.append(w)

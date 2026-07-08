@@ -5,17 +5,18 @@ from pathlib import Path
 import yaml
 
 from slam_fusion.datasets.manifests import DatasetManifest, load_manifest
-from slam_fusion.evaluation.baselines import BaselineStatus, baseline_status_table, list_baselines
+from slam_fusion.evaluation.baselines import (
+    BaselineStatus,
+    baseline_status_table,
+    list_baselines,
+)
 
 
 def test_baseline_registry_separates_claim_maturity() -> None:
     baselines = list_baselines()
     assert baselines
     assert any(spec.status == BaselineStatus.IMPLEMENTED for spec in baselines)
-    assert any(
-        spec.status in {BaselineStatus.PROTOTYPE, BaselineStatus.PLANNED}
-        for spec in baselines
-    )
+    assert any(spec.status in {BaselineStatus.PROTOTYPE, BaselineStatus.PLANNED} for spec in baselines)
     assert all("state-of-the-art" not in spec.purpose.lower() for spec in baselines)
 
 
