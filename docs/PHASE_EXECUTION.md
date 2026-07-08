@@ -86,7 +86,29 @@ Purpose:
 - generate documentation-ready vector figures from actual experiment logs;
 - avoid manually drawn or invented visualizations.
 
-## Phase 6: External dataset benchmark gate
+## Phase 6: Benchmark metric schema and table generation
+
+Runs:
+
+```bash
+python scripts/validate_benchmark_metrics.py benchmark/example_metric.json
+python scripts/generate_benchmark_table.py benchmark/example_metric.json --output-dir results/tables
+```
+
+Validates:
+
+- `results/tables/benchmark_table.md`;
+- `results/tables/benchmark_table.tex`.
+
+Purpose:
+
+- enforce a metric schema before benchmark values are reported;
+- generate Markdown and LaTeX tables from metric JSON files;
+- prevent hand-edited benchmark tables that cannot be reproduced.
+
+The committed `benchmark/example_metric.json` is a schema example only. It must not be reported as a real dataset result.
+
+## Phase 7: External dataset benchmark gate
 
 Checks whether an external dataset directory exists.
 
