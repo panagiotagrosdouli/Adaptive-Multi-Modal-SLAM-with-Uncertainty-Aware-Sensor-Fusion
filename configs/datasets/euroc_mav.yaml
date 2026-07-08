@@ -1,0 +1,36 @@
+dataset:
+  name: EuRoC MAV
+  homepage: https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets
+  license_note: Download from the official dataset host and cite the EuRoC MAV paper.
+  root: data/euroc
+  format: euroc_mav
+  sensor_setup: stereo_inertial
+  sequences:
+    - name: MH_01_easy
+      difficulty: easy
+      path: MH_01_easy/mav0
+      ground_truth: state_groundtruth_estimate0/data.csv
+    - name: MH_02_easy
+      difficulty: easy
+      path: MH_02_easy/mav0
+      ground_truth: state_groundtruth_estimate0/data.csv
+    - name: MH_03_medium
+      difficulty: medium
+      path: MH_03_medium/mav0
+      ground_truth: state_groundtruth_estimate0/data.csv
+    - name: MH_04_difficult
+      difficulty: difficult
+      path: MH_04_difficult/mav0
+      ground_truth: state_groundtruth_estimate0/data.csv
+    - name: MH_05_difficult
+      difficulty: difficult
+      path: MH_05_difficult/mav0
+      ground_truth: state_groundtruth_estimate0/data.csv
+reporting:
+  required_metrics:
+    - matched_poses
+    - ate_rmse
+    - rpe_rmse
+    - tracking_failures
+    - fps
+  alignment_policy: visual_inertial_systems_should_report_se3_or_none
