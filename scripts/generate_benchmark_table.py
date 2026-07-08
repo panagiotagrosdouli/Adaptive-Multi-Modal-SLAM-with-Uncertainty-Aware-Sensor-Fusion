@@ -162,7 +162,7 @@ def render_latex(rows: list[BenchmarkRow]) -> str:
                     row.fps,
                 ]
             )
-            + " \\\"  # noqa: W605
+            + " \\\\"
         )
     lines.extend(["\\bottomrule", "\\end{tabular}"])
     return "\n".join(lines) + "\n"
