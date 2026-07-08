@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 
 from src.backends.orbslam3_backend import OrbSlam3Backend, OrbSlam3Config
