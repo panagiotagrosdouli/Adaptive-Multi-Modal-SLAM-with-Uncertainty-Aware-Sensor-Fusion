@@ -76,7 +76,9 @@ class AdaptiveSensorFusion:
         distance = float(residual.T @ np.linalg.pinv(covariance) @ residual)
         return distance <= self.config.mahalanobis_threshold, distance
 
-    def dropout_weights(self, reliabilities: dict[str, float], variances: dict[str, float]) -> dict[str, float]:
+    def dropout_weights(
+        self, reliabilities: dict[str, float], variances: dict[str, float]
+    ) -> dict[str, float]:
         """Handle modality dropout by assigning zero weight to reliability <= 0."""
 
         active_reliabilities = {k: v for k, v in reliabilities.items() if v > 0.0}
