@@ -1,0 +1,36 @@
+dataset:
+  name: KITTI Odometry
+  homepage: https://www.cvlibs.net/datasets/kitti/eval_odometry.php
+  license_note: Download from the official KITTI host and follow KITTI usage terms.
+  root: data/kitti_odometry
+  format: kitti_odometry
+  sensor_setup: stereo_visual
+  sequences:
+    - name: '00'
+      difficulty: urban_loop
+      path: sequences/00
+      ground_truth: poses/00.txt
+    - name: '01'
+      difficulty: highway
+      path: sequences/01
+      ground_truth: poses/01.txt
+    - name: '02'
+      difficulty: urban_loop
+      path: sequences/02
+      ground_truth: poses/02.txt
+    - name: '05'
+      difficulty: urban_loop
+      path: sequences/05
+      ground_truth: poses/05.txt
+    - name: '06'
+      difficulty: urban
+      path: sequences/06
+      ground_truth: poses/06.txt
+reporting:
+  required_metrics:
+    - matched_poses
+    - ate_rmse
+    - rpe_rmse
+    - tracking_failures
+    - fps
+  alignment_policy: stereo_systems_should_report_se3_or_none
