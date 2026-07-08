@@ -1,0 +1,52 @@
+experiment:
+  name: synthetic_visual_degradation
+  status: Prototype
+  seed: 17
+  output_dir: results/synthetic_visual_degradation
+  description: >
+    Synthetic ablation for testing whether adaptive fusion reduces camera
+    confidence when visual quality is degraded. This is not a real benchmark.
+
+simulation:
+  duration_s: 30.0
+  dt_s: 0.1
+  trajectory: figure_eight
+  ground_truth_available: true
+
+modalities:
+  camera:
+    enabled: true
+    nominal_variance: 0.04
+    degradation:
+      type: feature_dropout
+      start_s: 10.0
+      end_s: 20.0
+      retained_feature_fraction: 0.25
+  imu:
+    enabled: true
+    nominal_variance: 0.01
+  lidar:
+    enabled: false
+    nominal_variance: 0.02
+  rgbd:
+    enabled: false
+    nominal_variance: 0.03
+
+fusion:
+  policy: adaptive_uncertainty_aware
+  reliability_exponent: 2.0
+  min_reliability: 0.001
+  mahalanobis_threshold: 9.21
+
+metrics:
+  - ate_rmse
+  - rpe_rmse
+  - nees
+  - nis
+  - tracking_failure_rate
+  - reliability_calibration
+
+reporting:
+  benchmark_claim: Pending
+  require_metrics_json: true
+  require_config_snapshot: true
