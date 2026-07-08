@@ -1,0 +1,32 @@
+dataset:
+  name: TUM-VI
+  homepage: https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset
+  license_note: Download from the official TUM-VI host and follow dataset terms.
+  root: data/tum_vi
+  format: tum_vi
+  sensor_setup: stereo_inertial
+  sequences:
+    - name: room1
+      difficulty: indoor_room
+      path: dataset-room1_512_16
+      ground_truth: dso/gt_imu.csv
+    - name: room2
+      difficulty: indoor_room
+      path: dataset-room2_512_16
+      ground_truth: dso/gt_imu.csv
+    - name: corridor1
+      difficulty: corridor
+      path: dataset-corridor1_512_16
+      ground_truth: dso/gt_imu.csv
+    - name: magistrale1
+      difficulty: large_indoor
+      path: dataset-magistrale1_512_16
+      ground_truth: dso/gt_imu.csv
+reporting:
+  required_metrics:
+    - matched_poses
+    - ate_rmse
+    - rpe_rmse
+    - tracking_failures
+    - fps
+  alignment_policy: visual_inertial_systems_should_report_se3_or_none
