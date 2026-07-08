@@ -86,7 +86,21 @@ Purpose:
 - generate documentation-ready vector figures from actual experiment logs;
 - avoid manually drawn or invented visualizations.
 
-## Phase 6: Benchmark metric schema and table generation
+## Phase 6: Dataset manifest validation
+
+Runs:
+
+```bash
+python scripts/check_dataset_manifest.py configs/datasets
+```
+
+Purpose:
+
+- validate external dataset manifest structure;
+- keep dataset paths, sequences, ground-truth conventions, and alignment policies explicit;
+- avoid hiding benchmark assumptions inside one-off scripts.
+
+## Phase 7: Benchmark metric schema and table generation
 
 Runs:
 
@@ -108,7 +122,7 @@ Purpose:
 
 The committed `benchmark/example_metric.json` is a schema example only. It must not be reported as a real dataset result.
 
-## Phase 7: External dataset benchmark gate
+## Phase 8: External dataset benchmark gate
 
 Checks whether an external dataset directory exists.
 
