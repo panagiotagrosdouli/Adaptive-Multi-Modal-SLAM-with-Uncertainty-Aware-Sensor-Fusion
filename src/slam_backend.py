@@ -1,19 +1,26 @@
+"""SLAM backend interfaces and a deterministic smoke-test backend."""
+
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional, Tuple
 
 import numpy as np
 
 
-@dataclass
+@dataclass(frozen=True)
 class SlamObservation:
+    """Sensor observation passed to a SLAM backend."""
+
     timestamp: float
-    image: Optional[np.ndarray] = None
-    imu_accel: Optional[np.ndarray] = None
-    imu_gyro: Optional[np.ndarray] = None
+    image: np.ndarray | None = None
+    imu_accel: np.ndarray | None = None
+    imu_gyro: np.ndarray | None = None
 
 
-@dataclass
+@dataclass(frozen=True)
 class SlamResult:
+    """Minimal SLAM result consumed by adaptive supervision modules."""
+
     timestamp: float
     position: np.ndarray
     orientation_quat: np.ndarray
@@ -23,25 +30,37 @@ class SlamResult:
 
 
 class SlamBackend:
+    """Abstract interface for SLAM/VIO backend wrappers."""
+
     def initialize(self) -> None:
+        """Initialize backend resources."""
+
         raise NotImplementedError
 
     def process(self, observation: SlamObservation) -> SlamResult:
+        """Process one observation and return the backend result."""
+
         raise NotImplementedError
 
     def shutdown(self) -> None:
-        pass
+        """Release backend resources."""
 
 
 class DummySlamBackend(SlamBackend):
+    """Deterministic backend used only for smoke tests and CI phases."""
+
     def __init__(self) -> None:
         self.position = np.zeros(3)
         self.orientation = np.array([0.0, 0.0, 0.0, 1.0])
 
     def initialize(self) -> None:
+        """Reset the deterministic state."""
+
         self.position = np.zeros(3)
 
     def process(self, observation: SlamObservation) -> SlamResult:
+        """Return a deterministic forward motion sample."""
+
         self.position = self.position + np.array([0.01, 0.0, 0.0])
         return SlamResult(
             timestamp=observation.timestamp,
