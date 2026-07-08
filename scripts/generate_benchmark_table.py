@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+LATEX_ROW_END = r" \\"
+
 
 @dataclass(frozen=True)
 class BenchmarkRow:
@@ -145,7 +147,7 @@ def render_latex(rows: list[BenchmarkRow]) -> str:
     lines = [
         "\\begin{tabular}{llllrrrr}",
         "\\toprule",
-        "Dataset & Sequence & Backend & Align & Matched & ATE & RPE & FPS \\\",
+        f"Dataset & Sequence & Backend & Align & Matched & ATE & RPE & FPS{LATEX_ROW_END}",
         "\\midrule",
     ]
     for row in rows:
@@ -162,7 +164,7 @@ def render_latex(rows: list[BenchmarkRow]) -> str:
                     row.fps,
                 ]
             )
-            + " \\\\"
+            + LATEX_ROW_END
         )
     lines.extend(["\\bottomrule", "\\end{tabular}"])
     return "\n".join(lines) + "\n"
