@@ -7,7 +7,12 @@ from typing import Sequence
 
 import numpy as np
 
-from src.metrics import AlignmentMode, MetricError, absolute_trajectory_error, relative_pose_error
+from src.metrics import (
+    AlignmentMode,
+    MetricError,
+    absolute_trajectory_error,
+    relative_pose_error,
+)
 from src.trajectory import TrajectoryPose
 
 
@@ -30,23 +35,16 @@ def match_trajectories_by_timestamp(
     """Match estimated and ground-truth poses by nearest timestamp.
 
     The function performs monotonic nearest-neighbor association under a maximum
-    time gate.  It is appropriate for already time-synchronized trajectories such
-    as EuRoC exports.  For asynchronous sensors with clock drift, a dedicated
+    time gate. It is appropriate for already time-synchronized trajectories such
+    as EuRoC exports. For asynchronous sensors with clock drift, a dedicated
     time-offset calibration step should be applied before evaluation.
-
-    Args:
-        ground_truth: Ground-truth trajectory poses.
-        estimated: Estimated trajectory poses.
-        max_time_difference_ns: Maximum allowed timestamp difference for a match.
-
-    Returns:
-        Two Nx3 arrays containing matched ground-truth and estimated positions.
     """
 
     if max_time_difference_ns < 0:
         raise ValueError("max_time_difference_ns must be non-negative.")
     if not ground_truth or not estimated:
-        return np.empty((0, 3), dtype=np.float64), np.empty((0, 3), dtype=np.float64)
+        empty = np.empty((0, 3), dtype=np.float64)
+        return empty, empty
 
     gt_sorted = sorted(ground_truth, key=lambda pose: pose.timestamp_ns)
     est_sorted = sorted(estimated, key=lambda pose: pose.timestamp_ns)
@@ -80,18 +78,7 @@ def evaluate_trajectory(
     alignment: AlignmentMode = "none",
     rpe_delta: int = 1,
 ) -> TrajectoryEvaluation:
-    """Evaluate an estimated trajectory using ATE and RPE.
-
-    Args:
-        ground_truth: Ground-truth poses.
-        estimated: Estimated poses.
-        max_time_difference_ns: Timestamp association gate.
-        alignment: Alignment convention applied before ATE/RPE.
-        rpe_delta: Index spacing for relative translation increments.
-
-    Returns:
-        TrajectoryEvaluation containing matched pose count and RMSE metrics.
-    """
+    """Evaluate an estimated trajectory using ATE and RPE."""
 
     gt_positions, est_positions = match_trajectories_by_timestamp(
         ground_truth,
@@ -110,7 +97,12 @@ def evaluate_trajectory(
 
     try:
         ate = absolute_trajectory_error(gt_positions, est_positions, alignment=alignment)
-        rpe = relative_pose_error(gt_positions, est_positions, delta=rpe_delta, alignment=alignment)
+        rpe = relative_pose_error(
+            gt_positions,
+            est_positions,
+            delta=rpe_delta,
+            alignment=alignment,
+        )
     except MetricError as exc:
         raise ValueError(f"Trajectory evaluation failed: {exc}") from exc
 
