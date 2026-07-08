@@ -62,7 +62,9 @@ class AdaptiveSensorFusion:
 
         return np.asarray(covariance, dtype=float) * self.covariance_scale(reliability)
 
-    def mahalanobis_gate(self, residual: np.ndarray, covariance: np.ndarray) -> tuple[bool, float]:
+    def mahalanobis_gate(
+        self, residual: np.ndarray, covariance: np.ndarray
+    ) -> tuple[bool, float]:
         """Apply innovation consistency gating.
 
         Returns:
@@ -71,7 +73,10 @@ class AdaptiveSensorFusion:
 
         residual = np.asarray(residual, dtype=float)
         covariance = np.asarray(covariance, dtype=float)
-        if covariance.shape[0] != covariance.shape[1] or covariance.shape[0] != residual.shape[0]:
+        if (
+            covariance.shape[0] != covariance.shape[1]
+            or covariance.shape[0] != residual.shape[0]
+        ):
             raise ValueError("residual and covariance dimensions are inconsistent")
         distance = float(residual.T @ np.linalg.pinv(covariance) @ residual)
         return distance <= self.config.mahalanobis_threshold, distance
