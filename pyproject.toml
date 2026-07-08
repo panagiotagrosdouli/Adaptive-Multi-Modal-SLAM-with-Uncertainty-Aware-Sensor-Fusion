@@ -43,7 +43,7 @@ target-version = "py310"
 src = ["slam_fusion", "src", "tests", "scripts"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "SIM", "C4", "RUF"]
+select = ["E", "F", "B", "SIM", "C4", "RUF"]
 ignore = ["E501"]
 
 [tool.pytest.ini_options]
