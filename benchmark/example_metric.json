@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "dataset": "ExampleDataset",
+    "sequence": "example_sequence",
+    "backend": "DummyBackend",
+    "sensor_setup": "synthetic",
+    "alignment": "none",
+    "note": "Example schema only. Do not report this as a real benchmark."
+  },
+  "metrics": {
+    "matched_poses": 20,
+    "ate_rmse": 0.0,
+    "rpe_rmse": 0.0,
+    "fps": 0.0,
+    "tracking_failures": 0,
+    "alignment": "none"
+  }
+}
