@@ -191,6 +191,14 @@ def run_media_phase(results: list[PhaseResult], experiment_name: str) -> None:
     )
 
 
+def run_dataset_manifest_phase(results: list[PhaseResult]) -> None:
+    """Validate external dataset manifest schemas."""
+
+    results.append(
+        run_command([sys.executable, "scripts/check_dataset_manifest.py", "configs/datasets"])
+    )
+
+
 def run_benchmark_reporting_phase(results: list[PhaseResult]) -> None:
     """Validate benchmark schema and deterministic table generation."""
 
@@ -230,6 +238,7 @@ def main() -> None:
     if not args.skip_media:
         run_media_phase(results, experiment_name)
 
+    run_dataset_manifest_phase(results)
     run_benchmark_reporting_phase(results)
     results.append(dataset_phase(Path(args.dataset_root)))
 
