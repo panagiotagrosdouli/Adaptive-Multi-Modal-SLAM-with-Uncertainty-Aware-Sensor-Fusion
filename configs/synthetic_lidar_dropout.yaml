@@ -1,0 +1,53 @@
+experiment:
+  name: synthetic_lidar_dropout
+  status: Prototype
+  seed: 23
+  output_dir: results/synthetic_lidar_dropout
+  description: >
+    Synthetic modality-dropout experiment for testing robust reweighting when
+    LiDAR measurements become unavailable. This is a scaffold, not a real KITTI
+    or nuScenes benchmark.
+
+simulation:
+  duration_s: 30.0
+  dt_s: 0.1
+  trajectory: corridor_turn
+  ground_truth_available: true
+
+modalities:
+  camera:
+    enabled: true
+    nominal_variance: 0.05
+  imu:
+    enabled: true
+    nominal_variance: 0.01
+  lidar:
+    enabled: true
+    nominal_variance: 0.02
+    degradation:
+      type: hard_dropout
+      start_s: 12.0
+      end_s: 18.0
+      reliability: 0.0
+  rgbd:
+    enabled: false
+    nominal_variance: 0.03
+
+fusion:
+  policy: adaptive_uncertainty_aware
+  reliability_exponent: 2.0
+  min_reliability: 0.001
+  mahalanobis_threshold: 9.21
+
+metrics:
+  - ate_rmse
+  - rpe_rmse
+  - nees
+  - nis
+  - modality_dropout_recovery
+  - adaptive_weight_shift
+
+reporting:
+  benchmark_claim: Pending
+  require_metrics_json: true
+  require_config_snapshot: true
