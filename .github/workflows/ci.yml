@@ -32,6 +32,9 @@ jobs:
       - name: Ruff lint
         run: ruff check slam_fusion src tests scripts
 
+      - name: Black format
+        run: black slam_fusion src tests scripts
+
       - name: Black format check
         run: black --check slam_fusion src tests scripts
 
