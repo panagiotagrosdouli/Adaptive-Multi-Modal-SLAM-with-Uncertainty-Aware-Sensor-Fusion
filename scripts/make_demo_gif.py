@@ -1,98 +1,97 @@
-"""Generate an honest synthetic demo GIF for adaptive fusion diagnostics.
-
-The animation is generated from deterministic synthetic data. It is not a benchmark.
-"""
-
+"""Render Synthetic Demo GIF and MP4 from generated SLAM results."""
 from __future__ import annotations
 
 import argparse
+import csv
 from pathlib import Path
 
-import matplotlib.animation as animation
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-
-from slam_fusion.fusion.adaptive import AdaptiveSensorFusion
-
-
-def generate_demo(output_gif: Path, output_mp4: Path, seed: int = 7, steps: int = 80) -> None:
-    """Generate synthetic trajectory, weights, uncertainty ellipse, and risk timeline."""
-
-    rng = np.random.default_rng(seed)
-    output_gif.parent.mkdir(parents=True, exist_ok=True)
-    output_mp4.parent.mkdir(parents=True, exist_ok=True)
-    t = np.linspace(0.0, 2.0 * np.pi, steps)
-    gt = np.column_stack([np.cos(t), np.sin(t)])
-    visual_rel = np.clip(
-        0.9 - 0.65 * np.exp(-0.5 * ((np.arange(steps) - 45) / 9) ** 2),
-        0.05,
-        1.0,
-    )
-    imu_rel = np.clip(0.75 + 0.05 * np.sin(t), 0.05, 1.0)
-    lidar_rel = np.clip(0.85 - 0.5 * (np.arange(steps) > 58), 0.05, 1.0)
-    fusion = AdaptiveSensorFusion()
-    weights = []
-    est = []
-    current = np.array([1.0, 0.0])
-    for k in range(steps):
-        w = fusion.dropout_weights(
-            {
-                "camera": float(visual_rel[k]),
-                "imu": float(imu_rel[k]),
-                "lidar": float(lidar_rel[k]),
-            },
-            {"camera": 0.04, "imu": 0.09, "lidar": 0.06},
-        )
-        weights.append(w)
-        noise_scale = 0.02 + 0.08 * (1.0 - max(w.values()))
-        current = gt[k] + rng.normal(0.0, noise_scale, size=2)
-        est.append(current)
-    est_arr = np.asarray(est)
-    risk = 1.0 - np.maximum.reduce([visual_rel, imu_rel, lidar_rel])
-
-    fig, ax = plt.subplots(figsize=(6, 6))
-
-    def update(frame: int) -> list[object]:
-        ax.clear()
-        ax.plot(gt[: frame + 1, 0], gt[: frame + 1, 1], label="ground truth")
-        ax.plot(est_arr[: frame + 1, 0], est_arr[: frame + 1, 1], label="estimated")
-        ax.scatter(est_arr[frame, 0], est_arr[frame, 1], s=40)
-        cov_scale = 0.04 + 0.25 * risk[frame]
-        ellipse = plt.Circle(est_arr[frame], cov_scale, fill=False, linestyle="--")
-        ax.add_patch(ellipse)
-        w = weights[frame]
-        text = (
-            f"camera r={visual_rel[frame]:.2f}, w={w['camera']:.2f}\n"
-            f"imu r={imu_rel[frame]:.2f}, w={w['imu']:.2f}\n"
-            f"lidar r={lidar_rel[frame]:.2f}, w={w['lidar']:.2f}\n"
-            f"risk={risk[frame]:.2f} | synthetic demo"
-        )
-        ax.text(0.02, 0.98, text, transform=ax.transAxes, va="top")
-        ax.set_xlim(-1.4, 1.4)
-        ax.set_ylim(-1.4, 1.4)
-        ax.set_aspect("equal")
-        ax.grid(True, alpha=0.3)
-        ax.legend(loc="lower left")
-        ax.set_title("Adaptive multi-modal SLAM diagnostic demo")
-        return []
-
-    ani = animation.FuncAnimation(fig, update, frames=steps, interval=80, blit=False)
-    ani.save(output_gif, writer="pillow", fps=12)
-    try:
-        ani.save(output_mp4, writer="ffmpeg", fps=12)
-    except Exception:
-        output_mp4.write_text("MP4 generation requires ffmpeg; GIF was generated successfully.\n")
-    plt.close(fig)
+from PIL import Image
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--gif", default="assets/demo.gif")
-    parser.add_argument("--mp4", default="results/videos/demo.mp4")
-    parser.add_argument("--seed", type=int, default=7)
-    args = parser.parse_args()
-    generate_demo(Path(args.gif), Path(args.mp4), seed=args.seed)
+def _read_csv(path: Path) -> dict[str, np.ndarray]:
+    with path.open(encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    return {key: np.array([float(row[key]) for row in rows]) for key in rows[0]}
+
+
+def make_demo_gif(results_dir: str | Path = "results", assets_dir: str | Path = "assets") -> dict[str, str]:
+    root = Path(results_dir)
+    frames_dir = root / "videos" / "frames"
+    frames_dir.mkdir(parents=True, exist_ok=True)
+    assets = Path(assets_dir)
+    (assets / "gifs").mkdir(parents=True, exist_ok=True)
+    (assets / "videos").mkdir(parents=True, exist_ok=True)
+    gt = _read_csv(root / "ground_truth.csv")
+    est = _read_csv(root / "estimated_trajectory.csv")
+    landmarks = _read_csv(root / "landmarks.csv")
+    conf = _read_csv(root / "sensor_confidence.csv")
+    weights = _read_csv(root / "fusion_weights.csv")
+    unc = _read_csv(root / "uncertainty.csv")
+    stride = max(1, len(gt["x"]) // 80)
+    indices = list(range(0, len(gt["x"]), stride))
+    if indices[-1] != len(gt["x"]) - 1:
+        indices.append(len(gt["x"]) - 1)
+    frame_paths: list[Path] = []
+    for frame_id, k in enumerate(indices):
+        fig = plt.figure(figsize=(9, 5))
+        ax = fig.add_axes([0.07, 0.12, 0.56, 0.78])
+        panel = fig.add_axes([0.68, 0.12, 0.28, 0.78])
+        ax.plot(gt["x"][: k + 1], gt["y"][: k + 1], label="ground truth")
+        ax.plot(est["x"][: k + 1], est["y"][: k + 1], label="estimate")
+        ax.scatter(landmarks["x"], landmarks["y"], s=10, marker="x", label="landmarks")
+        ax.scatter([gt["x"][k]], [gt["y"][k]], s=45, label="robot")
+        ax.add_patch(plt.Circle((est["x"][k], est["y"][k]), max(0.05, unc["covariance_trace"][k]), fill=False, linestyle="--"))
+        ax.set_title("Adaptive Multi-Modal SLAM with Uncertainty-Aware Sensor Fusion\nSynthetic Demo")
+        ax.set_aspect("equal", adjustable="box")
+        ax.set_xlabel("x [m]")
+        ax.set_ylabel("y [m]")
+        ax.legend(fontsize=8)
+        panel.axis("off")
+        lines = [f"time: {gt['time'][k]:.1f}s", "", "confidence / fusion weight"]
+        for sensor in ("camera", "imu", "lidar", "rgbd"):
+            lines.append(f"{sensor:6s}: {conf[sensor][k]:.2f} / {weights[sensor][k]:.2f}")
+        lines.extend(["", f"uncertainty: {unc['uncertainty_score'][k]:.2f}", f"failure risk: {unc['failure_risk'][k]:.2f}"])
+        events = []
+        if 42 <= k <= 82:
+            events.append("visual degradation")
+        if 72 <= k <= 106:
+            events.append("LiDAR dropout")
+        if 102 <= k <= 136:
+            events.append("depth noise")
+        if 118 <= k <= 155:
+            events.append("IMU bias drift")
+        if events:
+            lines.extend(["", "events:", *events])
+        if k == len(gt["x"]) - 1:
+            lines.extend(["", "mission summary:", "Synthetic outputs saved", "metrics + figures + GIF + MP4"])
+        panel.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
+        frame_path = frames_dir / f"frame_{frame_id:04d}.png"
+        fig.savefig(frame_path, dpi=130)
+        plt.close(fig)
+        frame_paths.append(frame_path)
+    images = [Image.open(path).convert("P", palette=Image.Palette.ADAPTIVE) for path in frame_paths]
+    gif_asset = assets / "gifs" / "demo.gif"
+    gif_results = root / "videos" / "adaptive_multimodal_slam_demo.gif"
+    images[0].save(gif_asset, save_all=True, append_images=images[1:], duration=90, loop=0)
+    images[0].save(gif_results, save_all=True, append_images=images[1:], duration=90, loop=0)
+    first = cv2.imread(str(frame_paths[0]))
+    height, width = first.shape[:2]
+    mp4_asset = assets / "videos" / "demo.mp4"
+    mp4_results = root / "videos" / "adaptive_multimodal_slam_demo.mp4"
+    for target in (mp4_asset, mp4_results):
+        writer = cv2.VideoWriter(str(target), cv2.VideoWriter_fourcc(*"mp4v"), 12.0, (width, height))
+        for frame_path in frame_paths:
+            writer.write(cv2.imread(str(frame_path)))
+        writer.release()
+    return {"gif": str(gif_asset), "mp4": str(mp4_asset), "results_gif": str(gif_results), "results_mp4": str(mp4_results)}
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--results-dir", default="results")
+    parser.add_argument("--assets-dir", default="assets")
+    args = parser.parse_args()
+    print(make_demo_gif(args.results_dir, args.assets_dir))
