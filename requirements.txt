@@ -1,5 +1,7 @@
-numpy
-opencv-python
-pyyaml
-matplotlib
-scipy
+numpy>=1.23
+opencv-python>=4.8
+pyyaml>=6.0
+matplotlib>=3.7
+scipy>=1.10
+pillow>=10.0
+pytest>=8.0
