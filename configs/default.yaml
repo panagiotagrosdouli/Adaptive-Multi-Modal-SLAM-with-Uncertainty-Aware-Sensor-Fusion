@@ -1,0 +1,17 @@
+label: Synthetic Demo
+random_seed: 7
+trajectory_length_steps: 160
+dt: 0.1
+fusion_mode: adaptive
+sensor_noise:
+  camera: 0.09
+  imu: 0.05
+  lidar: 0.07
+  rgbd: 0.08
+dropout_probability: 0.03
+degradation_events:
+  visual_degradation: [42, 82]
+  lidar_dropout: [72, 106]
+  depth_noise: [102, 136]
+  imu_bias_drift: [118, 155]
+output_directory: results
