@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "adaptive-multimodal-slam"
-version = "0.2.0"
+version = "0.3.0"
 description = "PhD-grade adaptive multi-modal SLAM research framework with uncertainty-aware sensor fusion."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -16,6 +16,7 @@ dependencies = [
     "pyyaml>=6.0",
     "matplotlib>=3.7",
     "scipy>=1.10",
+    "pillow>=10.0",
 ]
 
 [project.optional-dependencies]
