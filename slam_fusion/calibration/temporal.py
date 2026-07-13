@@ -1,8 +1,8 @@
 """Bounded online temporal calibration for cross-modal sensor streams.
 
-This module is intentionally backend-independent.  It estimates a scalar time
- offset from paired residual traces and refuses updates when excitation is
-insufficient.  The estimator is a research prototype, not a safety guarantee.
+This module is intentionally backend-independent. It estimates a scalar time
+offset from paired residual traces and refuses updates when excitation is
+insufficient. The estimator is a research prototype, not a safety guarantee.
 """
 
 from __future__ import annotations
@@ -143,7 +143,9 @@ class TemporalOffsetEstimator:
             )
 
         proposed = float(best_lag * sample_period_s)
-        delta = float(np.clip(proposed - self.offset_s, -self.config.max_update_s, self.config.max_update_s))
+        delta = float(
+            np.clip(proposed - self.offset_s, -self.config.max_update_s, self.config.max_update_s)
+        )
         candidate = float(
             np.clip(
                 self.offset_s + self.config.smoothing * delta,
@@ -151,16 +153,23 @@ class TemporalOffsetEstimator:
                 self.config.max_abs_offset_s,
             )
         )
-        residual_before = 1.0 - max(best_corr, 0.0)
-        residual_after = abs(proposed - candidate) / max(self.config.max_abs_offset_s, 1e-12)
+
+        # Compare the current and candidate estimates against the same lag-error objective.
+        # The previous implementation compared correlation error before the update with
+        # parameter error after the update, which made valid bounded steps appear unstable.
+        scale_s = max(self.config.max_abs_offset_s, sample_period_s, 1e-12)
+        residual_before = abs(proposed - self.offset_s) / scale_s
+        residual_after = abs(proposed - candidate) / scale_s
 
         rolled_back = False
-        if residual_after > self.config.instability_ratio * max(residual_before, 1e-6):
+        if residual_after > self.config.instability_ratio * max(residual_before, 1e-12):
             self._bad_updates += 1
         else:
             self._bad_updates = 0
             self.offset_s = candidate
-            self.uncertainty_s = max(sample_period_s * (1.0 - observability), sample_period_s / ref.size)
+            self.uncertainty_s = max(
+                sample_period_s * (1.0 - observability), sample_period_s / ref.size
+            )
 
         if self._bad_updates >= self.config.rollback_window:
             self.offset_s = self._last_stable_offset_s
