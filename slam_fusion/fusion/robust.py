@@ -61,7 +61,7 @@ def robust_reliability_weights(
     accepted = {sensor: score for sensor, score in effective.items() if sensor not in rejected}
     normalizer = float(sum(accepted.values()))
     if normalizer <= 0.0:
-        weights = {sensor: 0.0 for sensor in effective}
+        weights = dict.fromkeys(effective, 0.0)
     else:
         weights = {
             sensor: (score / normalizer if sensor in accepted else 0.0)
