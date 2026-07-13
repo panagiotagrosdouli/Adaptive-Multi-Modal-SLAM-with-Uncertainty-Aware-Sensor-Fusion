@@ -1,0 +1,41 @@
+{
+  "phase": 2,
+  "updated": "2026-07-13",
+  "branch": "feature/phase2-fault-isolation-self-calibration",
+  "execution_status": "blocked_local_clone_dns",
+  "capabilities": {
+    "temporal_calibration": {
+      "status": "Research Prototype",
+      "evidence_path": "slam_fusion/calibration/temporal.py",
+      "test_path": "tests/test_phase2_core.py",
+      "known_limitation": "Scalar correlation-based offset; tests not executed in current connector-only environment.",
+      "next_action": "Run pytest and integrate camera-IMU, LiDAR-IMU and wheel-IMU residual streams."
+    },
+    "fault_model": {
+      "status": "Implemented core model",
+      "evidence_path": "slam_fusion/faults/model.py",
+      "test_path": "tests/test_phase2_core.py",
+      "known_limitation": "Sensor-specific injection transforms are pending.",
+      "next_action": "Implement deterministic injection for at least delayed, biased, dropped and degenerate faults."
+    },
+    "fault_isolation": {
+      "status": "Research Prototype",
+      "evidence_path": "slam_fusion/faults/isolation.py",
+      "test_path": "tests/test_phase2_core.py",
+      "known_limitation": "Normalized heuristic evidence is not a calibrated probability.",
+      "next_action": "Calibrate on disjoint train/calibration/test episodes and compare isolation baselines."
+    },
+    "extrinsic_calibration": {"status": "Missing", "evidence_path": null, "test_path": null, "known_limitation": "Not implemented.", "next_action": "Add bounded prior-regularized refinement with rollback."},
+    "reliability_calibration": {"status": "Missing", "evidence_path": null, "test_path": null, "known_limitation": "Not implemented.", "next_action": "Add logistic, isotonic and metrics on disjoint splits."},
+    "conformal_bounds": {"status": "Missing", "evidence_path": null, "test_path": null, "known_limitation": "Not implemented.", "next_action": "Add split conformal and empirical coverage reporting."},
+    "distribution_shift": {"status": "Missing", "evidence_path": null, "test_path": null, "known_limitation": "Not implemented.", "next_action": "Add rolling residual and KS-style detectors."},
+    "robust_fusion": {"status": "Missing", "evidence_path": null, "test_path": null, "known_limitation": "Not implemented.", "next_action": "Add conservative reliability-interval weighting."},
+    "predictive_failure": {"status": "Missing", "evidence_path": null, "test_path": null, "known_limitation": "Not implemented.", "next_action": "Add trend and logistic horizon predictors."},
+    "map_health": {"status": "Missing", "evidence_path": null, "test_path": null, "known_limitation": "Not implemented.", "next_action": "Add landmark and map-region health tracking."},
+    "active_sensing": {"status": "Missing", "evidence_path": null, "test_path": null, "known_limitation": "Not implemented.", "next_action": "Add observability-aware action scoring."},
+    "adaptive_compute": {"status": "Missing", "evidence_path": null, "test_path": null, "known_limitation": "Not implemented.", "next_action": "Add budget-aware allocation and profiling."},
+    "closed_loop_autonomy": {"status": "Missing", "evidence_path": null, "test_path": null, "known_limitation": "Not implemented.", "next_action": "Add failure-aware state machine and navigation coupling."},
+    "dataset_execution": {"status": "Pending Dataset Execution", "evidence_path": null, "test_path": null, "known_limitation": "No dataset run in this session.", "next_action": "Validate fixtures and execute available sequences."},
+    "ros2_validation": {"status": "Pending ROS2 Validation", "evidence_path": null, "test_path": null, "known_limitation": "No ROS2 runtime available in this session.", "next_action": "Run bag replay and diagnostics in ROS2 environment."}
+  }
+}
