@@ -1,0 +1,10 @@
+{
+  "status": "Implemented",
+  "scope": [
+    "slam_fusion/faults/isolation.py",
+    "slam_fusion/faults/model.py"
+  ],
+  "fixed_rules": ["E701", "E702"],
+  "verification": "Pending GitHub Actions execution",
+  "known_limitation": "The execution container did not provide a local clone for an independent ruff invocation."
+}
