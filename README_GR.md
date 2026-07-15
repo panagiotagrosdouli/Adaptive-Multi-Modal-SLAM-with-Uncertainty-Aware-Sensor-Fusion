@@ -8,7 +8,7 @@
 
 </div>
 
-<p align="center"><img src="assets/readme/adaptive_fusion_constellation.svg" alt="Προσαρμοστική πολυτροπική σύντηξη αισθητήρων" width="100%" /></p>
+<p align="center"><img src="assets/readme/adaptive_multimodal_pipeline_v2.svg" alt="Προσαρμοστική πολυτροπική σύντηξη αισθητήρων" width="100%" /></p>
 
 <p align="center"><em>Επεξηγηματικό διάγραμμα της μεθόδου. Δεν αποτελεί benchmark σε πραγματικό dataset ή απόδειξη παραγωγικής ετοιμότητας.</em></p>
 
@@ -73,7 +73,7 @@ git clone https://github.com/panagiotagrosdouli/Adaptive-Multi-Modal-SLAM-with-U
 cd Adaptive-Multi-Modal-SLAM-with-Uncertainty-Aware-Sensor-Fusion
 python -m venv .venv
 source .venv/bin/activate
-python -m pip install -e "[dev]"
+python -m pip install -e ".[dev]"
 python run_experiment.py --config configs/example_experiment.yaml
 python scripts/run_all_phases.py
 pytest
