@@ -20,7 +20,9 @@ def test_timestamp_synchronization_gate() -> None:
 
 def test_adaptive_weights_sum_to_one_and_downweight_degradation() -> None:
     fusion = AdaptiveSensorFusion()
-    weights = fusion.precision_weights({"camera": 0.2, "imu": 0.9}, {"camera": 0.04, "imu": 0.04})
+    weights = fusion.precision_weights(
+        {"camera": 0.2, "imu": 0.9}, {"camera": 0.04, "imu": 0.04}
+    )
     assert np.isclose(sum(weights.values()), 1.0)
     assert weights["imu"] > weights["camera"]
 
